@@ -1,0 +1,5 @@
+#!/bin/bash
+args="$@"
+command="$args"
+echo "$command"
+docker exec -it whatsapp-api-app sh -c "$command"

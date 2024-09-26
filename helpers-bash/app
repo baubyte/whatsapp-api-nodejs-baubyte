@@ -1,0 +1,9 @@
+#!/bin/bash
+args="$@"
+if [ -z "$args" ]; then
+  echo "No se proporcionaron argumentos. Conectando al contenedor..."
+  docker exec -it whatsapp-api-app sh
+else
+  echo "Ejecutando comando: $args"
+  docker exec -it whatsapp-api-app sh -c "$args"
+fi
