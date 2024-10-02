@@ -19,7 +19,11 @@ class Session {
                 try {
                     const { getWebhookState } = useMongoDBWebhookState(db.collection(key))
                     const webhookData = await getWebhookState(key)
-                    const { customWebhook, webhookEnabled } = webhookData
+                    if (!webhookData) {
+                        logger.warn(`No se encontró ningún documento de webhook para la colección: ${key}`);
+                        continue;
+                    }
+                    const { webhookEnabled, customWebhook } = webhookData
                     const webhookUrl    = webhookEnabled ? customWebhook : (config.webhookEnabled) ? config.webhookUrl : null
                     const webhook       = webhookEnabled ? webhookEnabled : config.webhookEnabled
                     const instance = new WhatsAppInstance(key, webhook, webhookUrl)
