@@ -1,22 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WhatsApp QrCode</title>
-    <style>
-        div {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-    </style>
+    <!-- Bulma CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
 </head>
+
 <body>
-    <h1> Scan Code Below Using WhatsApp App<h1>
-            <div class="container">
-                <img src="<%= qrcode %>" alt="" id="qrcode_box" />
+    <!-- Navbar -->
+    <section class="hero is-primary">
+        <div class="hero-body">
+            <p class="title">WhatsApp Código QR</p>
+            <p class="subtitle">Inicio de sesión con WhatsApp</p>
+        </div>
+    </section>
+
+    <!-- Main content -->
+    <section class="section">
+        <div class="container has-text-centered">
+            <h1 class="title">Escanea el siguiente código usando la aplicación WhatsApp</h1>
+            <div class="box is-flex is-justify-content-center is-align-items-center" style="padding: 2rem;">
+                <img src="<%= qrcode %>" alt="QR Code" id="qrcode_box" />
             </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="content has-text-centered">
+            <p>WhatsApp QR Code Connection © 2024</p>
+        </div>
+    </footer>
 </body>
+
 </html>

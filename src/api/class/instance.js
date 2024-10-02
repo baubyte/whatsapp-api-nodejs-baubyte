@@ -28,8 +28,8 @@ class WhatsAppInstance {
     }
     key = ''
     authState
-    allowWebhook = undefined
-    webhook = undefined
+    allowWebhook = false
+    webhook = null
 
     instance = {
         key: this.key,
@@ -38,6 +38,7 @@ class WhatsAppInstance {
         messages: [],
         qrRetry: 0,
         customWebhook: '',
+        webhookEnabled: false,
     }
 
     axiosInstance = axios.create({
@@ -46,13 +47,14 @@ class WhatsAppInstance {
 
     constructor(key, allowWebhook, webhook) {
         this.key = key ? key : uuidv4()
-        this.instance.customWebhook = this.webhook ? this.webhook : webhook
-        this.allowWebhook = config.webhookEnabled
-            ? config.webhookEnabled
-            : allowWebhook
+        this.instance.customWebhook = webhook ? webhook : (config.webhookEnabled) ? config.webhookUrl : null
+        this.allowWebhook = allowWebhook
+            ? allowWebhook
+            : config.webhookEnabled
         if (this.allowWebhook && this.instance.customWebhook !== null) {
             this.allowWebhook = true
             this.instance.customWebhook = webhook
+            this.instance.webhookEnabled = true
             this.axiosInstance = axios.create({
                 baseURL: webhook,
             })
@@ -91,7 +93,9 @@ class WhatsAppInstance {
         // on socket closed, opened, connecting
         sock?.ev.on('connection.update', async (update) => {
             const { connection, lastDisconnect, qr } = update
-            if (connection === 'connecting') return
+            if (connection === 'connecting'){
+                return;
+            }
 
             if (connection === 'close') {
                 // reconnect if not logged out
@@ -102,7 +106,7 @@ class WhatsAppInstance {
                     await this.init()
                 } else {
                     await this.collection.drop().then((r) => {
-                        logger.info('STATE: Droped collection')
+                        logger.info('STATE: Drooped collection')
                     })
                     this.instance.online = false
                 }

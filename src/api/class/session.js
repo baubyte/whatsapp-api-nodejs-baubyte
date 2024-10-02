@@ -19,13 +19,9 @@ class Session {
                 try {
                     const { getWebhookState } = useMongoDBWebhookState(db.collection(key))
                     const webhookData = await getWebhookState(key)
-                    const customWebhookUrl = webhookData?.customWebhook ? webhookData?.customWebhook : undefined;
-                    const defaultWebhookUrl = config.webhookUrl ? config.webhookUrl : undefined;
-                    const webhookEnabledCustom = webhookData?.webhookEnabled ? webhookData?.webhookEnabled : undefined;
-                    const webhookEnabledDefault = config.webhookEnabled ? config.webhookEnabled : undefined;
-                    const webhook = webhookEnabledCustom ? webhookEnabledCustom : webhookEnabledDefault;
-                    const webhookUrl = customWebhookUrl ? customWebhookUrl : defaultWebhookUrl;
-
+                    const { customWebhook, webhookEnabled } = webhookData
+                    const webhookUrl    = webhookEnabled ? customWebhook : (config.webhookEnabled) ? config.webhookUrl : null
+                    const webhook       = webhookEnabled ? webhookEnabled : config.webhookEnabled
                     const instance = new WhatsAppInstance(key, webhook, webhookUrl)
                     await instance.init()
                     WhatsAppInstances[key] = instance

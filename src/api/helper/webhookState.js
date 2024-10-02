@@ -13,7 +13,10 @@ module.exports = useMongoDBWebhookState = (collection) => {
     }
 
     const getWebhookState = async (key) => {
-        return await collection.findOne({ key }, { projection: { webhookEnabled: 1, customWebhook: 1 } })
+        return await collection.findOne({ key }, { projection: {
+            webhookEnabled: 1, 
+            customWebhook: 1 
+        }})
     }
 
     return {
