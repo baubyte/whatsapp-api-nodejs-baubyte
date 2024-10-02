@@ -78,6 +78,7 @@ class WhatsAppInstance {
         this.authState = { state: state, saveCreds: saveCreds }
         this.socketConfig.auth = this.authState.state
         this.socketConfig.browser = Object.values(config.browser)
+		//TODO: ADD VERSION
         this.instance.sock = makeWASocket(this.socketConfig)
         const { saveWebhookState } = useMongoDBWebhookState(this.collection)
         await saveWebhookState(this.key, this.allowWebhook, this.instance.customWebhook)
@@ -87,6 +88,20 @@ class WhatsAppInstance {
 
     setHandler() {
         const sock = this.instance.sock
+		//TODO: PAIRING CODE CONNECTION
+		// if (options.usePairingCode && !wa.authState.creds.registered) {
+		// 	if (!wa.authState.creds.account) {
+		// 		await wa.waitForConnectionUpdate((update) => {
+		// 			return Boolean(update.qr)
+		// 		})
+		// 		const code = await wa.requestPairingCode(options.phoneNumber)
+		// 		if (res && !res.headersSent && code !== undefined) {
+		// 			response(res, 200, true, 'Verify on your phone and enter the provided code.', { code })
+		// 		} else {
+		// 			response(res, 500, false, 'Unable to create session.')
+		// 		}
+		// 	}
+		// }
         // on credentials update save state
         sock?.ev.on('creds.update', this.authState.saveCreds)
 
@@ -105,9 +120,7 @@ class WhatsAppInstance {
                 ) {
                     await this.init()
                 } else {
-                    await this.collection.drop().then((r) => {
-                        logger.info('STATE: Drooped collection')
-                    })
+                    await this.deleteInstance(this.key)
                     this.instance.online = false
                 }
 
@@ -164,6 +177,9 @@ class WhatsAppInstance {
                         // remove all events
                         this.instance.sock.ev.removeAllListeners()
                         this.instance.qr = ' '
+						this.deleteInstance(this.key).then(() => {
+							logger.info('instance deleted');
+						})
                         logger.info('socket connection terminated')
                     }
                 })
@@ -421,9 +437,17 @@ class WhatsAppInstance {
         })
     }
 
+
+
     async deleteInstance(key) {
         try {
-            await Chat.findOneAndDelete({ key: key })
+			await mongoClient.db('whatsapp-api')
+						.collection(key)
+						.drop().then((r) => {
+							logger.info('STATE: Drooped collection')
+						});
+            await Chat.findOneAndDelete({ key: key });
+			delete WhatsAppInstances[key]
         } catch (e) {
             logger.error('Error updating document failed')
         }
