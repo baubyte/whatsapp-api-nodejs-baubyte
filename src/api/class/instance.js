@@ -746,7 +746,9 @@ class WhatsAppInstance {
 
     async getAllGroups() {
         let Chats = await this.getChat()
-        return Chats.filter((c) => c.id.includes('@g.us')).map((data, i) => {
+        return Chats.filter((c) => {
+            return c.id?.includes('@g.us')
+        }).map((data, i) => {
             return {
                 index: i,
                 name: data.name,
