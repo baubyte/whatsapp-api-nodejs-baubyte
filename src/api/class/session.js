@@ -24,7 +24,7 @@ class Session {
                         continue;
                     }
                     const { webhookEnabled, customWebhook } = webhookData
-                    const webhookUrl    = webhookEnabled ? customWebhook : (config.webhookEnabled) ? config.webhookUrl : null
+                    const webhookUrl    = (webhookEnabled && customWebhook) ? customWebhook : (config.webhookEnabled) ? config.webhookUrl : null
                     const webhook       = webhookEnabled ? webhookEnabled : config.webhookEnabled
                     const instance = new WhatsAppInstance(key, webhook, webhookUrl)
                     await instance.init()

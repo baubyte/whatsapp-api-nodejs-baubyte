@@ -33,6 +33,8 @@ exports.qr = async (req, res) => {
         const qrcode = await WhatsAppInstances[req.query.key]?.instance.qr
         res.render('qrcode', {
             qrcode: qrcode,
+            key: req.query.key,
+            appUrl: config.appUrl || req.protocol + '://' + req.headers.host,
         })
     } catch {
         res.json({

@@ -47,7 +47,7 @@ class WhatsAppInstance {
 
     constructor(key, allowWebhook, webhook) {
         this.key = key ? key : uuidv4()
-        this.instance.customWebhook = webhook ? webhook : (config.webhookEnabled) ? config.webhookUrl : null
+        this.instance.customWebhook = webhook ? webhook : (config.webhookEnabled) ? config.webhookUrl : null 
         this.allowWebhook = allowWebhook
             ? allowWebhook
             : config.webhookEnabled
@@ -69,7 +69,7 @@ class WhatsAppInstance {
                 body,
                 instanceKey: key,
             })
-            .catch(() => {})
+            .catch(() => { })
     }
 
     async init() {
@@ -78,7 +78,7 @@ class WhatsAppInstance {
         this.authState = { state: state, saveCreds: saveCreds }
         this.socketConfig.auth = this.authState.state
         this.socketConfig.browser = Object.values(config.browser)
-		//TODO: ADD VERSION
+        //TODO: ADD VERSION
         this.instance.sock = makeWASocket(this.socketConfig)
         const { saveWebhookState } = useMongoDBWebhookState(this.collection)
         await saveWebhookState(this.key, this.allowWebhook, this.instance.customWebhook)
@@ -88,27 +88,27 @@ class WhatsAppInstance {
 
     setHandler() {
         const sock = this.instance.sock
-		//TODO: PAIRING CODE CONNECTION
-		// if (options.usePairingCode && !wa.authState.creds.registered) {
-		// 	if (!wa.authState.creds.account) {
-		// 		await wa.waitForConnectionUpdate((update) => {
-		// 			return Boolean(update.qr)
-		// 		})
-		// 		const code = await wa.requestPairingCode(options.phoneNumber)
-		// 		if (res && !res.headersSent && code !== undefined) {
-		// 			response(res, 200, true, 'Verify on your phone and enter the provided code.', { code })
-		// 		} else {
-		// 			response(res, 500, false, 'Unable to create session.')
-		// 		}
-		// 	}
-		// }
+        //TODO: PAIRING CODE CONNECTION
+        // if (options.usePairingCode && !wa.authState.creds.registered) {
+        // 	if (!wa.authState.creds.account) {
+        // 		await wa.waitForConnectionUpdate((update) => {
+        // 			return Boolean(update.qr)
+        // 		})
+        // 		const code = await wa.requestPairingCode(options.phoneNumber)
+        // 		if (res && !res.headersSent && code !== undefined) {
+        // 			response(res, 200, true, 'Verify on your phone and enter the provided code.', { code })
+        // 		} else {
+        // 			response(res, 500, false, 'Unable to create session.')
+        // 		}
+        // 	}
+        // }
         // on credentials update save state
         sock?.ev.on('creds.update', this.authState.saveCreds)
 
         // on socket closed, opened, connecting
         sock?.ev.on('connection.update', async (update) => {
             const { connection, lastDisconnect, qr } = update
-            if (connection === 'connecting'){
+            if (connection === 'connecting') {
                 return;
             }
 
@@ -177,9 +177,9 @@ class WhatsAppInstance {
                         // remove all events
                         this.instance.sock.ev.removeAllListeners()
                         this.instance.qr = ' '
-						this.deleteInstance(this.key).then(() => {
-							logger.info('instance deleted');
-						})
+                        this.deleteInstance(this.key).then(() => {
+                            logger.info('instance deleted');
+                        })
                         logger.info('socket connection terminated')
                     }
                 })
@@ -220,7 +220,8 @@ class WhatsAppInstance {
                     messages: [],
                 }
             })
-            this.instance.chats.push(...chats)
+            this.instance.chats.push(...chats);
+            this.updateDb(this.instance.chats);
         })
 
         // on chat change
@@ -237,6 +238,7 @@ class WhatsAppInstance {
                     ...chat,
                 }
             })
+            this.updateDb(this.instance.chats)
         })
 
         // on chat delete
@@ -249,6 +251,7 @@ class WhatsAppInstance {
                 )
                 this.instance.chats.splice(index, 1)
             })
+            this.updateDb(this.instance.chats)
         })
 
         // on new mssage
@@ -325,6 +328,8 @@ class WhatsAppInstance {
                 )
                     await this.SendWebhook('message', webhookData, this.key)
             })
+
+            await this.updateDb(this.instance.messages)
         })
 
         sock?.ev.on('messages.update', async (messages) => {
@@ -441,13 +446,13 @@ class WhatsAppInstance {
 
     async deleteInstance(key) {
         try {
-			await mongoClient.db('whatsapp-api')
-						.collection(key)
-						.drop().then((r) => {
-							logger.info('STATE: Drooped collection')
-						});
+            await mongoClient.db('whatsapp-api')
+                .collection(key)
+                .drop().then((r) => {
+                    logger.info('STATE: Drooped collection')
+                });
             await Chat.findOneAndDelete({ key: key });
-			delete WhatsAppInstances[key]
+            delete WhatsAppInstances[key]
         } catch (e) {
             logger.error('Error updating document failed')
         }
