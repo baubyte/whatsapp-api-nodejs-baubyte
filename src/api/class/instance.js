@@ -221,7 +221,6 @@ class WhatsAppInstance {
                 }
             })
             this.instance.chats.push(...chats);
-            this.updateDb(this.instance.chats);
         })
 
         // on chat change
@@ -238,7 +237,6 @@ class WhatsAppInstance {
                     ...chat,
                 }
             })
-            this.updateDb(this.instance.chats)
         })
 
         // on chat delete
@@ -251,7 +249,6 @@ class WhatsAppInstance {
                 )
                 this.instance.chats.splice(index, 1)
             })
-            this.updateDb(this.instance.chats)
         })
 
         // on new mssage
@@ -328,8 +325,6 @@ class WhatsAppInstance {
                 )
                     await this.SendWebhook('message', webhookData, this.key)
             })
-
-            await this.updateDb(this.instance.messages)
         })
 
         sock?.ev.on('messages.update', async (messages) => {
