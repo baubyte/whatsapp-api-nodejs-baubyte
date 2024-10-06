@@ -4,6 +4,8 @@ const pino = require('pino')
 const {
     default: makeWASocket,
     DisconnectReason,
+    fetchLatestBaileysVersion,
+    makeCacheableSignalKeyStore,
 } = require('@whiskeysockets/baileys')
 const { unlinkSync } = require('fs')
 const { v4: uuidv4 } = require('uuid')
@@ -30,7 +32,6 @@ class WhatsAppInstance {
     authState
     allowWebhook = false
     webhook = null
-
     instance = {
         key: this.key,
         chats: [],
@@ -77,31 +78,22 @@ class WhatsAppInstance {
         const { state, saveCreds } = await useMongoDBAuthState(this.collection)
         this.authState = { state: state, saveCreds: saveCreds }
         this.socketConfig.auth = this.authState.state
+        this.socketConfig.auth.keys = makeCacheableSignalKeyStore(state.keys, logger),
         this.socketConfig.browser = Object.values(config.browser)
-        //TODO: ADD VERSION
-        this.instance.sock = makeWASocket(this.socketConfig)
+        const { version} = await fetchLatestBaileysVersion();
+        this.socketConfig.version = version
+        /**
+         * @type {import('@whiskeysockets/baileys').AnyWASocket}
+         */
+        this.instance.sock = makeWASocket(this.socketConfig);
         const { saveWebhookState } = useMongoDBWebhookState(this.collection)
-        await saveWebhookState(this.key, this.allowWebhook, this.instance.customWebhook)
+        await saveWebhookState(this.key, this.allowWebhook, this.instance.customWebhook);
         this.setHandler()
         return this
     }
 
-    setHandler() {
+   setHandler() {
         const sock = this.instance.sock
-        //TODO: PAIRING CODE CONNECTION
-        // if (options.usePairingCode && !wa.authState.creds.registered) {
-        // 	if (!wa.authState.creds.account) {
-        // 		await wa.waitForConnectionUpdate((update) => {
-        // 			return Boolean(update.qr)
-        // 		})
-        // 		const code = await wa.requestPairingCode(options.phoneNumber)
-        // 		if (res && !res.headersSent && code !== undefined) {
-        // 			response(res, 200, true, 'Verify on your phone and enter the provided code.', { code })
-        // 		} else {
-        // 			response(res, 500, false, 'Unable to create session.')
-        // 		}
-        // 	}
-        // }
         // on credentials update save state
         sock?.ev.on('creds.update', this.authState.saveCreds)
 
@@ -166,7 +158,6 @@ class WhatsAppInstance {
                         this.key
                     )
             }
-
             if (qr) {
                 QRCode.toDataURL(qr).then((url) => {
                     this.instance.qr = url
