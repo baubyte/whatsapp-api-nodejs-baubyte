@@ -48,13 +48,12 @@ class WhatsAppInstance {
 
     constructor(key, allowWebhook, webhook) {
         this.key = key ? key : uuidv4()
-        this.instance.customWebhook = webhook ? webhook : (config.webhookEnabled) ? config.webhookUrl : null 
+        this.instance.customWebhook = webhook ? webhook : (config.webhookEnabled) ? config.webhookUrl : null
         this.allowWebhook = allowWebhook
             ? allowWebhook
             : config.webhookEnabled
         if (this.allowWebhook && this.instance.customWebhook !== null) {
             this.allowWebhook = true
-            this.instance.customWebhook = webhook
             this.instance.webhookEnabled = true
             this.axiosInstance = axios.create({
                 baseURL: webhook,
@@ -87,6 +86,8 @@ class WhatsAppInstance {
          */
         this.instance.sock = makeWASocket(this.socketConfig);
         const { saveWebhookState } = useMongoDBWebhookState(this.collection)
+        console.log(this.allowWebhook, this.instance.customWebhook);
+        
         await saveWebhookState(this.key, this.allowWebhook, this.instance.customWebhook);
         this.setHandler()
         return this
