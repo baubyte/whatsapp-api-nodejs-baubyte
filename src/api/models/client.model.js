@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const clientSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: [true, 'client is missing'],
+        required: [true, 'client name is missing'],
     },
     adicionalInfo: {
         type: String,
@@ -12,7 +12,7 @@ const clientSchema = new mongoose.Schema({
     },
     apiKey: {
         type: String,
-        required: [true, 'key is missing'],
+        required: [true, 'apiKey is missing'],
         unique: true,
     },
     isActive: {

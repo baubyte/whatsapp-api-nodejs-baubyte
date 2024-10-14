@@ -2,7 +2,7 @@
 const APIError = require('../../api/errors/api.error')
 
 const handler = (err, req, res, next) => {
-    const statusCode = err.statusCode ? err.statusCode : 500
+    const statusCode = err.status ? err.status : 500
     console.log(err);
     
     res.setHeader('Content-Type', 'application/json')
@@ -11,27 +11,40 @@ const handler = (err, req, res, next) => {
         error: true,
         code: statusCode,
         message: err.message,
+        errors: err.errors || null,
     })
 }
 
-exports.handler = handler
-
-exports.notFound = (req, res, next) => {
+exports.notFound = (error, req, res, next) => {
     const err = new APIError({
         message: 'Not found',
-        statusCode: 404,
+        status: 404,
+        errors: error,
     })
     return handler(err, req, res)
 }
 
 exports.badRequest = (error, req, res, next) => {
     let message = 'Bad Request'
+    let errors = error?.errors || [];
     if (error?.name === 'ValidationError') {
-        message = Object.values(error.errors).map((val) => val.message);
+        errors = Object.values(error.errors).map((val) => val.message);
     }
-    const apiError = {
+    const apiError = new APIError({
         message,
-        statusCode: 400,
-    }
+        errors,
+        status: 400
+    })
     return handler(apiError, req, res, next);
 }
+
+exports.internalServerError = (error, req, res, next) => {
+    const apiError = new APIError({
+        message: 'Internal Server Error',
+        errors: error,
+        status: 500
+    })
+    return handler(apiError, req, res, next);
+}
+
+exports.handler = handler;
