@@ -86,8 +86,6 @@ class WhatsAppInstance {
          */
         this.instance.sock = makeWASocket(this.socketConfig);
         const { saveWebhookState } = useMongoDBWebhookState(this.collection)
-        console.log(this.allowWebhook, this.instance.customWebhook);
-        
         await saveWebhookState(this.key, this.allowWebhook, this.instance.customWebhook);
         this.setHandler()
         return this

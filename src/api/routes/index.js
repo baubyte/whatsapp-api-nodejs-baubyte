@@ -5,12 +5,13 @@ const messageRoutes = require('./message.route')
 const miscRoutes = require('./misc.route')
 const groupRoutes = require('./group.route')
 const clientRoutes = require('./client.route')
+const tokenIsAdmin = require('../middlewares/tokenAdmin')
 
 router.get('/status', (req, res) => res.send('OK'))
 router.use('/instance', instanceRoutes)
 router.use('/message', messageRoutes)
 router.use('/group', groupRoutes)
 router.use('/misc', miscRoutes)
-router.use('/client', clientRoutes)
+router.use('/client',[tokenIsAdmin] ,clientRoutes)
 
 module.exports = router
